@@ -7,6 +7,7 @@ import com.inventra.Models.Role;
 import com.inventra.Models.User;
 import com.inventra.Repository.UserRepository;
 import com.inventra.Service.AuthService;
+import com.inventra.Service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,7 +29,7 @@ public class AuthServiceImplementation implements AuthService {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.USER); // default role
+        user.setRole(Role.USER);
 
         userRepository.save(user);
 
