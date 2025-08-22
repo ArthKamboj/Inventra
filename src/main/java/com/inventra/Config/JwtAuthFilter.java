@@ -1,6 +1,8 @@
 package com.inventra.Config;
 
+import com.inventra.Repository.BlackListedTokenRespository;
 import com.inventra.Repository.UserRepository;
+import com.inventra.Service.AuthService;
 import com.inventra.Service.JwtService;
 import com.inventra.Models.User;
 import jakarta.servlet.FilterChain;
@@ -21,10 +23,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final BlackListedTokenRespository blackListedTokenRespository;
 
-    public JwtAuthFilter(JwtService jwtService, UserRepository userRepository) {
+    public JwtAuthFilter(JwtService jwtService, UserRepository userRepository, BlackListedTokenRespository blackListedTokenRespository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
+        this.blackListedTokenRespository = blackListedTokenRespository;
     }
 
     @Override
@@ -40,6 +44,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 
         String jwt = authHeader.substring(7);
+
+        if(blackListedTokenRespository.existsByToken(jwt)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Token has been logged out");
+            return;
+        }
+
         String username = jwtService.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

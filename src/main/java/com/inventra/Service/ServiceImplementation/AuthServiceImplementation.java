@@ -3,8 +3,10 @@ package com.inventra.Service.ServiceImplementation;
 import com.inventra.Dto.AuthResponse;
 import com.inventra.Dto.LoginRequest;
 import com.inventra.Dto.RegisterRequest;
+import com.inventra.Models.BlackListedToken;
 import com.inventra.Models.Role;
 import com.inventra.Models.User;
+import com.inventra.Repository.BlackListedTokenRespository;
 import com.inventra.Repository.UserRepository;
 import com.inventra.Service.AuthService;
 import com.inventra.Service.JwtService;
@@ -14,6 +16,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
+import java.util.Date;
+
 @Service
 public class AuthServiceImplementation implements AuthService {
 
@@ -21,15 +26,18 @@ public class AuthServiceImplementation implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final BlackListedTokenRespository blackListedTokenRespository;
 
     public AuthServiceImplementation(UserRepository userRepository,
                                      PasswordEncoder passwordEncoder,
                                      JwtService jwtService,
-                                     AuthenticationManager authenticationManager) {
+                                     AuthenticationManager authenticationManager,
+                                     BlackListedTokenRespository blackListedTokenRespository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
+        this.blackListedTokenRespository = blackListedTokenRespository;
     }
 
     @Override
@@ -58,5 +66,17 @@ public class AuthServiceImplementation implements AuthService {
         AuthResponse response = new AuthResponse();
         response.setToken(token);
         return response;
+    }
+
+    @Override
+    public void logout(String token, Date expiry) {
+        BlackListedToken blackListedToken = new BlackListedToken();
+        blackListedToken.setToken(token);
+        blackListedToken.setExpiryDate(expiry.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+    }
+
+    @Override
+    public boolean isBlacklisted(String token) {
+        return blackListedTokenRespository.existsByToken(token);
     }
 }
