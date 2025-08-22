@@ -14,7 +14,7 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "SecretKey";
+    private static final String SECRET_KEY = "618a2fef96694871b82beced3cf25fb3ead13499bdaa0efecb3f02155c0abc71";
     private static final long EXPIRATION_TIME = 86400;
 
     public String generateToken(UserDetails userDetails) {
